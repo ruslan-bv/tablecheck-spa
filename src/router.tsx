@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { PageLayout } from 'Common/Page';
 import { Home } from 'Pages/Home';
+import { Shops }from 'Pages/Shops';
 
 export const SUPPORTED_LOCALES = orderedLocales.map(({ code }) => code);
 
@@ -28,6 +29,7 @@ export function Router({
         }
       >
         <Route index element={<Home />} />
+        <Route path="/:locale/shops" element={<Shops />} />
       </Route>
       <Route path="*" element={<Navigate to={`/${language}`} replace />} />
     </Routes>

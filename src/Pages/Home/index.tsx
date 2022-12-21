@@ -1,19 +1,28 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
 import { useTranslation } from 'react-i18next';
-import { Outlet } from 'react-router-dom';
+import { Outlet, Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Input } from '@tablecheck/tablekit-input';
 import { Button } from '@tablecheck/tablekit-button';
-import { getCitySearch, getShopResults } from '../../services/services';
-
-import { HomeHeadline, HomeWrapper, UnorderedList } from './styles';
+import { getCitySearch } from '../../services/services';
+import { ShopContext, ShopContextInterface } from '../../context/context';
+import { HomeHeadline, HomeWrapper, UnorderedList, StyledLink, FormGroup } from './styles';
 
 export function Home(): JSX.Element {
   const [t, { language }] = useTranslation();
   const [query, setQuery] = React.useState('');
   const [locations, setLocations] = React.useState([]);
   const [showSuggestions, setShowSuggestions] = React.useState(false);
-  const [selectedLocation, setSelectedLocation] = React.useState<any>();
+  const [lang, setLang] = React.useState('');
+
+  const location = useLocation();
+  const { selectedLocation, setSelectedLocation } = React.useContext(ShopContext) as ShopContextInterface;
+
+  React.useEffect(() => {
+    const { pathname } = location;
+    setLang(pathname.slice(1, -1));
+  }, [location])
 
   const handleOnChangeInput = async(e: any) => {
     setQuery(e.target.value);
@@ -24,18 +33,8 @@ export function Home(): JSX.Element {
     setShowSuggestions(true);
   }
 
-  const handleSearchInput = async () => {
-    const { payload : { geo } } = selectedLocation;
-    const res = await getShopResults(geo);
-    console.log(res)
-  }
-
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
-    if (!selectedLocation) return;
-    const { payload : { geo } } = selectedLocation;
-    const res = await getShopResults(geo);
-    console.log(res)
   }
 
   const onSelectLocation = (location: any) => {
@@ -61,7 +60,7 @@ export function Home(): JSX.Element {
           'keywords.app_name'
         )}`}</title>
       </Helmet>
-      <form onSubmit={handleFormSubmit}>
+      <FormGroup onSubmit={handleFormSubmit}>
         <Input 
           label="Search City" 
           type="search" 
@@ -78,8 +77,13 @@ export function Home(): JSX.Element {
             )
           })}
         </UnorderedList>}
-        <Button onClick={handleSearchInput}>Search</Button>
-      </form>
+        <StyledLink to={{
+          pathname: `/${lang}/shops`,
+          search: `?term=${selectedLocation?.text}`
+        }}>
+          <Button>Search</Button>
+        </StyledLink>
+      </FormGroup>
     </HomeWrapper>
   );
 }

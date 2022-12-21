@@ -12,7 +12,7 @@ export const getCitySearch = async (query: string) => {
 export const getShopResults = async (geo: any) => {
     try {
         const { lat, lon } = geo;
-        const url = `https://staging-snap.tablecheck.com/v2/shop_search?${lat}=35.670695&${lon}=139.7793595&shop_universe_id=57e0b91744aea12988000001&locale=en&per_page=50`;
+        const url = `https://staging-snap.tablecheck.com/v2/shop_search?geo_latitude=${lat}&geo_longitude=${lon}&shop_universe_id=57e0b91744aea12988000001&locale=en&per_page=50`;
         
         const result = await fetch(url).then(res => res.json());
         return result;
