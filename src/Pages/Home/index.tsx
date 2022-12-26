@@ -1,19 +1,18 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import { useTranslation } from 'react-i18next';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { Input } from '@tablecheck/tablekit-input';
 import { Button } from '@tablecheck/tablekit-button';
 import { getCitySearch } from '../../services/services';
 import { ShopContext, ShopContextInterface } from '../../context/context';
-import { HomeHeadline, HomeWrapper, UnorderedList, StyledLink, FormGroup } from './styles';
+import { LocationInterface } from '../../Interfaces/interfaces';
+import { HomeHeadline, HomeWrapper, UnorderedList, StyledLink, FormGroup, InputGroup } from './styles';
 
 export function Home(): JSX.Element {
-  const [t, { language }] = useTranslation();
   const [query, setQuery] = React.useState('');
   const [locations, setLocations] = React.useState([]);
-  const [showSuggestions, setShowSuggestions] = React.useState(false);
+  const [isShowSuggestions, setShowSuggestions] = React.useState(false);
   const [lang, setLang] = React.useState('');
 
   const location = useLocation();
@@ -24,24 +23,26 @@ export function Home(): JSX.Element {
     setLang(pathname.slice(1, -1));
   }, [location])
 
-  const handleOnChangeInput = async(e: any) => {
+  const handleOnChangeInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
     if (!e.target.value) return;
 
-    const { locations } = await getCitySearch(e.target.value);
-    setLocations(locations);
+    const newLocations = await getCitySearch(e.target.value);
+    setLocations(newLocations);
     setShowSuggestions(true);
   }
 
-  const handleFormSubmit = async (e: any) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   }
 
-  const onSelectLocation = (location: any) => {
+  const onSelectLocation = (newLocation: LocationInterface) => {
+    if (!newLocation) return;
+
     setLocations([]);
     setShowSuggestions(false);
-    setQuery(location.text);
-    setSelectedLocation(location);
+    setQuery(newLocation.text);
+    setSelectedLocation(newLocation);
   }
 
   React.useEffect(() => {
@@ -53,35 +54,34 @@ export function Home(): JSX.Element {
 
   return (
     <HomeWrapper>
-      <HomeHeadline>{t('attributes.titles.headline')}</HomeHeadline>
+      <HomeHeadline>Restaurant Search</HomeHeadline>
       <Outlet />
       <Helmet>
-        <title lang={language}>{`${t('attributes.titles.headline')} - ${t(
-          'keywords.app_name'
-        )}`}</title>
+        <title>Restaurant Search</title>
       </Helmet>
       <FormGroup onSubmit={handleFormSubmit}>
-        <Input 
-          label="Search City" 
-          type="search" 
-          onChange={handleOnChangeInput}
-          value={query}
-        />
-        {showSuggestions && query && 
-        <UnorderedList>
-          {locations?.map((location: any, index) => {
-            return (
-              <li key={index} onClick={() => onSelectLocation(location)}>
-                {location.text}
-              </li>
-            )
-          })}
-        </UnorderedList>}
+        <InputGroup>
+          <Input
+            type="search" 
+            onChange={handleOnChangeInput}
+            value={query}
+          />
+          {isShowSuggestions && query && 
+          <UnorderedList>
+            {locations.map((l: LocationInterface) => {
+              return (
+                <li key={self.crypto.randomUUID()} onClick={() => onSelectLocation(l)}>
+                  {l.text}
+                </li>
+              )
+            })}
+          </UnorderedList>}
+        </InputGroup>
         <StyledLink to={{
           pathname: `/${lang}/shops`,
           search: `?term=${selectedLocation?.text}`
         }}>
-          <Button>Search</Button>
+          <Button disabled={!selectedLocation?.text}>Search</Button>
         </StyledLink>
       </FormGroup>
     </HomeWrapper>

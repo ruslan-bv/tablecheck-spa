@@ -1,14 +1,16 @@
 import * as React from 'react';
+import { LocationInterface } from '../Interfaces/interfaces';
 
 export interface ShopContextInterface {
-    selectedLocation: any;
+    selectedLocation: LocationInterface | undefined;
     setSelectedLocation: any;
 }
 
-export const ShopContext = React.createContext<ShopContextInterface | null>(null);
+
+export const ShopContext = React.createContext<ShopContextInterface | undefined>(undefined);
 
 const ShopContextProvider:React.FC<any> = ({ children }) => {
-    const [selectedLocation, setSelectedLocation] = React.useState<any>();
+    const [selectedLocation, setSelectedLocation] = React.useState<LocationInterface | undefined>();
 
     const value = { selectedLocation, setSelectedLocation };
 
